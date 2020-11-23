@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>AEGIS Duty-State Maker v3</title>
+    <link rel="stylesheet" href="bootstrap.min.css">
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <img class="aegislogo" src="aegis-logo.png" alt="" style="padding-top:5px">
+    <div class="titletext" style="padding-top:0px;padding-bottom:0px;font-size:15px;">
+        AEGIS Duty-State Maker v3
+        <span style="display: block;padding-top:0px;font-size:13px">by gabe_jkl</span>
+    </div>
+    <div class="row">
+        <div class="column">
+            <form>
+                <div class="duties">
+                    <label for="dutiesForm" class="firstlabel">Duties</label>
+                    <input class="form-control" id="dutiesForm" placeholder="Description of your duties" oninput="updateDutyStateText()">
+                </div>
+                <div class="proof">
+                    <label for="proofForm">Proof Screenshot</label>
+                    <input class="form-control" id="proofForm" placeholder="Duty-proof screenshot" oninput="updateDutyStateText()">
+                </div>
+                <div class="starttablist">
+                    <label for="starttablistForm">Starting Tablist Screenshot</label>
+                    <input class="form-control" id="starttablistForm" placeholder="Start tablist screenshot" oninput="updateDutyStateText()">
+                </div>
+                <div class="endtablist">
+                    <label for="endtablistForm">Ending Tablist Screenshot</label>
+                    <input class="form-control" id="endtablistForm" placeholder="End tablist screenshot" oninput="updateDutyStateText()">
+                </div>
+                <div class="notes">
+                    <label for="notesForm">Notes</label>
+                    <input class="form-control" id="notesForm" placeholder="" oninput="updateDutyStateText()">
+                </div>
+            </form>
+        </div>
+        <div class="dutystate-text column" id="dutystate-text">
+            Username:<br>
+            Duty:<br>
+        <br>
+            Time Started:<br>
+            Tablist Started:<br>
+        <br>
+            Time Ended:<br>
+            Tablist Ended:<br>
+        </div>
+    </div>
+    <div class="row">
+        <div class="column2">
+            <button type="button" class="btn btn-primary dutystatecontrol" onclick="dutyStateButton()">Start Duty State</button>
+        </div>
+        <div class="column3">
+            <button type="button" class="btn btn-primary copycontrol graybutton" onclick="copy()">Copy</button>
+        </div>
+        <div class="column3">
+            <button type="button" class="btn btn-primary settingscontrol graybutton" onclick="">Settings</button>
+        </div>
+    </div>
+    <div class="row">
+            <div class="column4">00:00:00</div>
+            <div class="column5">
+                <div></div>
+                <!-- progress bar -->
+            </div>
+            <div class="column4">00:30:00</div>
+    </div>
+    </div>
+</body>
+
+<script>
+    var username = "";
+    var duty = "";
+    var proof = "";
+    var timestarted = "";
+    var tabliststarted = "";
+    var timeended = "";
+    var tablistended = "";
+    var notes = "";
+    var timezone = "";
+
+    var format = `Username: ${username}\nDuty: ${duty}\n${proof}\n\nTime Started: ${timestarted}\nTablist Started: ${tabliststarted}\n\nTime Ended: ${timeended}\nTablist Ended: ${tablistended}`
+    var mode = 0;
+
+    var startEpoch;
+    var endEpoch;
+
+    document.onload = updateDutyStateText();
+    function updateDutyStateText(){
+        duty = document.getElementById("dutiesForm").value;
+        proof = document.getElementById("proofForm").value;
+        tabliststarted = document.getElementById("starttablistForm").value;
+        tablistended = document.getElementById("endtablistForm").value;
+        notes = document.getElementById("notesForm").value;
+
+        format = `Username: ${username}\nDuty: ${duty}\n${proof}\n\nTime Started: ${timestarted}\nTablist Started: ${tabliststarted}\n\nTime Ended: ${timeended}\nTablist Ended: ${tablistended}`
+        if(notes != ""){
+            document.getElementById("dutystate-text").innerText = format + `\n\nNote: ${notes}`;
+        }
+        else{
+            document.getElementById("dutystate-text").innerText = format;
+        }
+    }
+
+    function copy(){
+        navigator.clipboard.writeText(document.getElementById("dutystate-text").innerText)
+    }
+
+    function dutyStateButton(){
+        var html = document.getElementsByTagName('html')[0];
+        var elem = document.getElementsByClassName('dutystatecontrol')[0];
+        if(mode==0){
+            mode = 1;
+            html.style.setProperty("--dutystatecontrol-color", "#F54E42");
+            html.style.setProperty("--dutystatecontrol-color-hover", "#DC463B");
+            html.style.setProperty("--dutystatecontrol-color-click", "#E0968F");
+            elem.innerText = "Stop Duty State";
+
+            //Start logic
+            var now = new Date();
+            startEpoch = Math.round(now.getTime() / 1000);
+            var minutes = now.getMinutes();
+            if(minutes < 10){
+                timestarted = now.getHours() + ":0" + minutes + " " + timezone; 
+            }
+            else{
+                timestarted = now.getHours() + ":" + minutes + " " + timezone;
+            }
+        }
+        else if(mode==1){
+            mode = 2;
+            html.style.setProperty("--dutystatecontrol-color", "#E3A700");
+            html.style.setProperty("--dutystatecontrol-color-hover", "#FFC800");
+            html.style.setProperty("--dutystatecontrol-color-click", "#E5C367");
+            elem.innerText = "Reset Duty State";
+
+            var now = new Date();
+            endEpoch = Math.round(now.getTime() / 1000);
+            var minutes = now.getMinutes();
+            if(minutes < 10){
+                timeended = now.getHours() + ":0" + minutes + " " + timezone; 
+            }
+            else{
+                timeended = now.getHours() + ":" + minutes + " " + timezone;
+            }
+        }
+        else if(mode==2){
+            mode = 0;
+            html.style.setProperty("--dutystatecontrol-color", "#7289DA");
+            html.style.setProperty("--dutystatecontrol-color-hover", "#667BC4");
+            html.style.setProperty("--dutystatecontrol-color-click", "#A6B1D4");
+            elem.innerText = "Start Duty State";
+
+            timestarted = "";
+            timeended = "";
+            document.getElementById("dutiesForm").value = "";
+            document.getElementById("proofForm").value = "";
+            document.getElementById("starttablistForm").value = "";
+            document.getElementById("endtablistForm").value = "";
+            document.getElementById("notesForm").value = "";
+        }
+        
+        updateDutyStateText()
+    }
+</script>
+</html>
